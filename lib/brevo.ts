@@ -30,15 +30,15 @@ export async function sendOrderConfirmationEmail(
   order: Order,
 ): Promise<void> {
   const apiKey = process.env.BREVO_API_KEY;
-  const senderEmail = process.env.BREVO_FROM_EMAIL;
+  const senderEmail = process.env.BREVO_FROM_EMAIL ?? process.env.BREVO_SENDER_EMAIL;
   if (!apiKey || !senderEmail) {
     console.warn(
-      "Brevo not configured (BREVO_API_KEY/BREVO_FROM_EMAIL) — skipping confirmation email",
+      "Brevo not configured (BREVO_API_KEY/BREVO_FROM_EMAIL or BREVO_SENDER_EMAIL) — skipping confirmation email",
     );
     return;
   }
 
-  const senderName = process.env.BREVO_FROM_NAME ?? "Hng-Shopping";
+  const senderName = process.env.BREVO_FROM_NAME ?? process.env.BREVO_SENDER_NAME ?? "Hng-Shopping";
   const { html, text } = renderOrderEmail(order);
   const res = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",

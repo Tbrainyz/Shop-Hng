@@ -22,7 +22,7 @@ const session = (email: string | null) =>
     .mockResolvedValue(email ? ({ user: { id: "u1", email } } as any) : null);
 
 /** Simulates a successful, correctly-priced Paystack charge for whatever total the test expects. */
-const paidSuccessfully = (amountMinor: number, currency = "USD") =>
+const paidSuccessfully = (amountMinor: number, currency = "NGN") =>
   vi
     .mocked(verifyPaystackTransaction)
     .mockResolvedValue({ success: true, amountMinor, currency });
@@ -140,7 +140,7 @@ describe("POST /api/checkout", () => {
     const totalForQty1 = computeTotals([
       { priceCents: p.priceCents, quantity: 1 },
     ]).totalCents;
-    paidSuccessfully(totalForQty1, "NGN"); // wrong currency vs. the shop's configured USD
+    paidSuccessfully(totalForQty1, "USD"); // wrong currency vs. the shop's configured NGN
     const res = await checkout(
       req({ items: [{ productId: p.id, quantity: 1 }], ...base }),
     );

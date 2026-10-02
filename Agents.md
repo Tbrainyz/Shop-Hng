@@ -4,8 +4,7 @@ Rules for any AI agent working in this repo.
 
 ## Project
 
-"Hng-Shopping" — an audio-gear shop (headphones/speakers/earphones) on Next.js (App Router) + TypeScript, Tailwind CSS. Visual design and catalog were ported from a user-supplied Vite/React frontend (the "Audiophile" template) — see "UI origin" below before changing styling. Cart, Paystack-verified checkout, Google sign-in, Postgres persistence (Supabase or Neon), Brevo order-confirmation email. Currency is USD by default (`lib/currency.ts`, `NEXT_PUBLIC_CURRENCY`), switchable to NGN.
-
+"Hng-Shopping" — an audio-gear shop (headphones/speakers/earphones) on Next.js (App Router) + TypeScript, Tailwind CSS. Visual design and catalog were ported from a user-supplied Vite/React frontend (the "Audiophile" template) — see "UI origin" below before changing styling. Cart, Paystack-verified checkout, Google sign-in, Postgres persistence (Supabase or Neon), Brevo order-confirmation email. Currency is NGN by default (`lib/currency.ts`, `NEXT_PUBLIC_CURRENCY`), switchable to USD.
 ## UI origin — read before restyling
 
 The design (navbar, footer, product pages, checkout layout, the `#D87D4A` accent color, Manrope font) is ported pixel-for-pixel from a user-supplied template, not something to redesign on a whim. If asked to change the look, change it — but don't drift the existing pages' structure/spacing as a side effect of an unrelated change.

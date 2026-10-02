@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { computeTotals, formatCents } from "@/lib/cart";
+import { CURRENCY } from "@/lib/currency";
 
 describe("computeTotals", () => {
   it("returns zero for an empty cart", () => {
@@ -21,7 +22,12 @@ describe("computeTotals", () => {
   });
 });
 
-describe("formatCents (USD by default)", () => {
+describe("formatCents (NGN by default)", () => {
+  it("uses NGN as the active currency", () => {
+    expect(CURRENCY).toBe("NGN");
+    expect(formatCents(150)).toContain("₦");
+  });
+
   it("formats whole and fractional amounts", () => {
     expect(formatCents(0)).toContain("0.00");
     expect(formatCents(150)).toContain("1.50");

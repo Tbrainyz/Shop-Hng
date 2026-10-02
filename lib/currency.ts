@@ -1,10 +1,10 @@
 /**
  * Single active currency for the whole shop, not a live multi-currency toggle —
- * Paystack charges in one currency per transaction anyway. Defaults to USD; set
- * NEXT_PUBLIC_CURRENCY=NGN to switch to Naira. Re-seed after switching (lib/seedProducts.ts
- * has per-currency prices) since amounts don't auto-convert.
+ * Paystack charges in one currency per transaction anyway. Defaults to NGN; set
+ * NEXT_PUBLIC_CURRENCY=USD to switch back to dollars. Re-seed after switching
+ * (lib/seedProducts.ts has per-currency prices) since amounts don't auto-convert.
  */
-export const CURRENCY: "NGN" | "USD" = process.env.NEXT_PUBLIC_CURRENCY === "NGN" ? "NGN" : "USD";
+export const CURRENCY: "NGN" | "USD" = process.env.NEXT_PUBLIC_CURRENCY === "USD" ? "USD" : "NGN";
 
 export function formatMoney(minorUnits: number, currency: string = CURRENCY): string {
   const locale = currency === "NGN" ? "en-NG" : "en-US";
