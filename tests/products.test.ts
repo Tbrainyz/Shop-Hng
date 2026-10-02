@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { setRepo } from "@/lib/db";
 import { MemoryOrderRepo } from "@/lib/memoryRepo";
+import { getSeedProducts } from "@/lib/seedProducts";
 import { GET as listProducts } from "@/app/api/products/route";
 
 beforeEach(() => setRepo(new MemoryOrderRepo()));
@@ -34,6 +35,12 @@ describe("GET /api/products catalog", () => {
       expect(Array.isArray(p.related)).toBe(true);
     }
   });
+
+  it("keeps each product at or below $150 USD in the catalog", () => {
+    const products = getSeedProducts("USD");
+    expect(Math.max(...products.map((p) => p.priceCents))).toBeLessThanOrEqual(15000);
+  });
+
   it("every related slug points at a product that actually exists in the catalog", async () => {
     const products = await (await listProducts()).json();
     const slugs = new Set(products.map((p: any) => p.slug));

@@ -1,11 +1,11 @@
 # Hng-Shopping
 
-An audio-gear shop (headphones, speakers, earphones) — Next.js, Tailwind, real Google sign-in, Paystack checkout, Postgres persistence, Mailgun confirmation emails. The design and 6-product catalog are ported from a user-supplied frontend template; see "UI origin" in `Agents.md` for what was kept, fixed, and deliberately left out (an admin dashboard and manual email/password sign-up — replaced by real Google sign-in).
+An audio-gear shop (headphones, speakers, earphones) — Next.js, Tailwind, real Google sign-in, Paystack checkout, Postgres persistence, Brevo confirmation emails. The design and 6-product catalog are ported from a user-supplied frontend template; see "UI origin" in `Agents.md` for what was kept, fixed, and deliberately left out (an admin dashboard and manual email/password sign-up — replaced by real Google sign-in).
 
 ```
 npm install
 npm run dev     # http://localhost:3000 — works immediately, no setup required
-npm test        # all tests run against an in-memory store and mocked Paystack/Mailgun — no external calls
+npm test        # all tests run against an in-memory store and mocked Paystack/Brevo — no external calls
 ```
 
 With no `.env.local` at all: you can browse products, view product pages, and add to cart. Signing in and paying will fail until you add the credentials below — that's expected, not a bug. There's no standalone cart page — the cart opens as a dropdown from the navbar's Cart button.
@@ -15,14 +15,17 @@ With no `.env.local` at all: you can browse products, view product pages, and ad
 Both are Postgres, so `DATABASE_URL` is all that matters; nothing else in the code changes.
 
 **Supabase**
+
 1. Create a project at [supabase.com](https://supabase.com).
 2. Project Settings → Database → Connection string. Copy the **Transaction pooler** string into `DATABASE_URL`, and the **Session pooler** (or direct connection) string into `DIRECT_URL`.
 
 **Neon**
+
 1. Create a project at [neon.tech](https://neon.tech).
 2. Dashboard → Connection Details → copy the connection string into both `DATABASE_URL` and `DIRECT_URL`.
 
 Then, with `.env.local` filled in:
+
 ```
 npm run db:push   # creates the Product/Order/OrderItem tables
 npm run db:seed   # loads the 6-product Audiophile catalog (headphones/speakers/earphones)
@@ -37,11 +40,12 @@ npm run db:seed   # loads the 6-product Audiophile catalog (headphones/speakers/
 5. Copy the Client ID and secret into `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
 6. Set `NEXTAUTH_SECRET` to the output of `openssl rand -base64 32` (or `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` if you don't have `openssl`).
 
-## 3. Mailgun
+## 3. Brevo order emails
 
-1. [app.mailgun.com](https://app.mailgun.com) → Sending → Domains → add a domain (or use the sandbox domain Mailgun gives new accounts — it can only email addresses you've explicitly authorized).
-2. Copy the domain into `MAILGUN_DOMAIN` and an API key (Settings → API Keys) into `MAILGUN_API_KEY`.
-3. If sending fails, checkout still succeeds and the order is saved — the response just comes back with `emailSent: false`, and the error is logged server-side.
+1. Create or select an account at [app.brevo.com](https://app.brevo.com), then verify the sender email address/domain under **Senders, Domains & Dedicated IPs**.
+2. Create an API key under **Transactional → SMTP & API → API Keys** and set `BREVO_API_KEY` in your environment.
+3. Set `BREVO_FROM_EMAIL` to the verified sender address. `BREVO_FROM_NAME` is optional and defaults to `Hng-Shopping`.
+4. If sending fails, checkout still succeeds and the order is saved — the response just comes back with `emailSent: false`, and the error is logged server-side.
 
 ## 4. Paystack
 
