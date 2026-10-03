@@ -51,9 +51,21 @@ export default function Navbar() {
               </button>
 
               {status === "authenticated" ? (
-                <button onClick={() => signOut()} className="text-[13px] font-bold uppercase tracking-[1px] border border-white px-[18px] py-2 hover:bg-white hover:text-black transition-all">
-                  {session.user?.name?.split(" ")[0] ?? "Account"}
-                </button>
+                <>
+                  <span
+                    className="max-w-[72px] truncate text-[12px] font-semibold sm:max-w-[120px]"
+                    title={session.user?.name ?? undefined}
+                  >
+                    {session.user?.name ?? "Account"}
+                  </span>
+                  <button
+                    onClick={() => signOut()}
+                    aria-label={`Sign out${session.user?.name ? ` ${session.user.name}` : ""}`}
+                    className="text-[13px] font-bold uppercase tracking-[1px] border border-white px-[18px] py-2 hover:bg-white hover:text-black transition-all"
+                  >
+                    Sign Out
+                  </button>
+                </>
               ) : (
                 <button onClick={() => signIn("google")} className="text-[13px] font-bold uppercase tracking-[1px] bg-[#D87D4A] text-white px-[18px] py-2 hover:bg-[#FBAF85] transition-colors">
                   Sign In
