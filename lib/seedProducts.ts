@@ -12,7 +12,7 @@ interface SeedProduct {
   category: string;
   stock: number;
   priceUSD: number; // cents
-  priceNGN: number; // kobo
+  priceNGN: number; // kobo (1 naira = 100 kobo). Rule used below: priceUSD cents x 1600 (about N1,600 per $1)
   image: string;
   gallery: string[];
   features: string;
@@ -26,7 +26,7 @@ const PRODUCTS: SeedProduct[] = [
   {
     slug: "xx99-mark-ii-headphones", name: "XX99 Mark II Headphones", category: "headphones", stock: 25,
     description: "Experience natural, lifelike audio and exceptional build quality.",   
-    priceUSD: 9900, priceNGN: 158400,
+    priceUSD: 9900, priceNGN: 15840000,
     image: "/assets/headphones/headphone1.svg",
     gallery: ["/assets/headphones/BitmapA.png", "/assets/headphones/BitmapB.png", "/assets/headphones/BitmapC.png"],
     features: "Featuring a genuine leather head strap and premium earcups, these headphones deliver superior comfort for long listening sessions. It includes intuitive controls designed for any situation.",
@@ -36,7 +36,7 @@ const PRODUCTS: SeedProduct[] = [
   {
     slug: "xx99-mark-i-headphones", name: "XX99 Mark I Headphones", category: "headphones", stock: 18,
     description: "As the gold standard for headphones, the classic XX99 Mark I offers detailed and accurate audio reproduction.",
-    priceUSD: 8900, priceNGN: 142400,
+    priceUSD: 8900, priceNGN: 14240000,
     image: "/assets/headphones/headphone2.svg",
     gallery: ["/assets/headphones/BitmapD.png", "/assets/headphones/BitmapE.png", "/assets/headphones/BitmapF.png"],
     features: "The XX99 Mark I headphones have been crafted with premium materials and precision engineering to ensure a natural listening experience.",
@@ -46,7 +46,7 @@ const PRODUCTS: SeedProduct[] = [
   {
     slug: "xx59-headphones", name: "XX59 Headphones", category: "headphones", stock: 40,
     description: "Enjoy your audio almost anywhere and customize it to your liking.",
-    priceUSD: 6500, priceNGN: 104000,
+    priceUSD: 6500, priceNGN: 10400000,
     image: "/assets/headphones/headphone3.svg",
     gallery: ["/assets/headphones/BitmapG.png", "/assets/headphones/BitmapH.png", "/assets/headphones/BitmapI.png"],
     features: "These headphones are compact yet powerful, delivering balanced sound and portability for users on the move.",
@@ -56,7 +56,7 @@ const PRODUCTS: SeedProduct[] = [
   {
     slug: "zx7-speaker", name: "ZX7 Speaker", category: "speakers", stock: 15,
     description: "Stream high quality sound wirelessly with minimal loss.",
-    priceUSD: 10900, priceNGN: 174400,
+    priceUSD: 10900, priceNGN: 17440000,
     image: "/assets/speakers/speaker1.svg",
     gallery: ["/assets/speakers/BitmapM.png", "/assets/speakers/BitmapN.png", "/assets/speakers/spec.png"],
     features: "The ZX7 speaker combines sleek design with powerful acoustic performance to create immersive sound experiences.",
@@ -66,7 +66,7 @@ const PRODUCTS: SeedProduct[] = [
   {
     slug: "yx1-earphones", name: "YX1 Earphones", category: "earphones", stock: 50,
     description: "Tailor your listening experience with bespoke dynamic drivers.",
-    priceUSD: 4900, priceNGN: 78400,
+    priceUSD: 4900, priceNGN: 7840000,
     image: "/assets/earphones/earphone.svg",
     gallery: ["/assets/earphones/Bitmap.svg", "/assets/earphones/BitmapP.png", "/assets/earphones/BitmapQ.png"],
     features: "The YX1 earphones feature active noise cancellation and excellent sound isolation for immersive listening anywhere.",
@@ -76,7 +76,7 @@ const PRODUCTS: SeedProduct[] = [
   {
     slug: "zx9-speaker", name: "ZX9 Speaker", category: "speakers", stock: 12,
     description: "Upgrade your sound system with the all new ZX9 active speaker.",
-    priceUSD: 13900, priceNGN: 222400,
+    priceUSD: 13900, priceNGN: 22240000,
     image: "/assets/speakers/speaker2.svg",
     gallery: ["/assets/speakers/BitmapJ.png", "/assets/speakers/BitmapK.png", "/assets/speakers/BitmapL.png"],
     features: "Connect via Bluetooth or nearly any wired source. The ZX9 speaker system delivers room-filling sound with remarkable clarity.",

@@ -35,8 +35,18 @@ Two things were deliberately **left out** of the port, not forgotten:
 | GET    | /api/products           | 200 `Product[]` (slug, category, gallery, includes, related, isNew, featured) | 500           |
 | POST   | /api/checkout           | 201 `{orderId, totalCents, emailSent}`                                        | 400, 401, 500 |
 | \*     | /api/auth/[...nextauth] | NextAuth-managed (Google sign-in)                                             | —             |
+| GET    | /api/products/[slug]    | 200 `Product`                                                                 | 404, 500      |
+| GET    | /api/orders/[id]        | 200 `Order` (caller's own only; others' orders are 404)                       | 401, 404, 500 |
+| GET    | /api/me                 | 200 `{id, email}` for the cookie or bearer-token caller                       | 401, 500      |
+| GET    | /api/cart               | 200 `{items, rev}` (hydrated with name/image/price); `?since=<rev>` -> `{unchanged:true, rev}` | 401, 500 |
+| PUT    | /api/cart               | body `{items:[{productId, quantity}]}` replaces the cart; 200 `{items, rev}`   | 400, 401, 500 |
+| GET    | /api/mobile/token       | 3xx redirect to the app deep link with `?token=` (needs `?redirect=`, a session cookie) | 400, 401, 500 |
 
 `POST /api/checkout` requires `paystackReference`: the client charges the card via the Paystack **InlineJS v2** popup first (`https://js.paystack.co/v2/inline.js`, `new window.PaystackPop().newTransaction({...})` — not v1's `PaystackPop.setup()`, which throws "put your Paystack Inline javascript file inside of a form element" when called outside the declarative form-embed style), then posts the reference here. The route 400s immediately if `PAYSTACK_SECRET_KEY` isn't set (checked before calling Paystack, so misconfiguration shows up as a clear message rather than a generic 500), then calls `verifyPaystackTransaction()` (`lib/paystack.ts`) and refuses the order (400) unless Paystack confirms `status: "success"` with an amount and currency matching the server-computed total.
+
+**Mobile app auth:** API routes identify the caller with `getUser(req)` (`lib/getUser.ts`), which accepts the NextAuth cookie (web) or `Authorization: Bearer <jwt>` (mobile app). Mobile sign-in goes `/mobile-login?redirect=<deep link>` → Google → `/api/mobile/token`, which mints the bearer token. The redirect is validated by `lib/mobileRedirect.ts` (app schemes, plus Expo Go on private-network hosts only) so tokens can't be sent to arbitrary sites. New routes use `getUser`, not `getServerSession`.
+
+**Shared cart:** signed-in users' carts live on the server (`Cart` table, `repo.getCart/setCart`, `/api/cart`) so the website and the mobile app show the same cart. Clients push every change (debounced) and poll `?since=<rev>` every 2s; guests keep a local cart that is merged at sign-in (`lib/cartMerge.ts`). Checkout empties the server cart. Conflict policy is last-write-wins on the whole cart.
 
 `/`, `/category/[category]`, `/product/[slug]`, and `/order/[id]` are Server Components that read the repo directly (no API route) — that's fine for reads; any new mutation still needs a tested route handler.
 

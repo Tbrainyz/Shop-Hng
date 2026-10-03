@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prismaClient";
-import type { OrderRepo } from "./repo";
+import type { OrderRepo, StoredCart, StoredCartItem } from "./repo";
 import type { CreateOrderInput, Order, Product } from "./types";
 
 const toProduct = (p: any): Product => ({
@@ -46,5 +46,20 @@ export class PrismaOrderRepo implements OrderRepo {
   async getOrder(id: string, userId: string) {
     const o = await prisma.order.findUnique({ where: { id }, include: { items: true } });
     return o && o.userId === userId ? toOrder(o) : undefined;
+  }
+
+  async getCart(userId: string): Promise<StoredCart> {
+    const c = await prisma.cart.findUnique({ where: { userId } });
+    return c ? { items: c.items as unknown as StoredCartItem[], rev: c.rev } : { items: [], rev: 0 };
+  }
+
+  async setCart(userId: string, items: StoredCartItem[]): Promise<StoredCart> {
+    const json = items as unknown as Prisma.InputJsonValue;
+    const c = await prisma.cart.upsert({
+      where: { userId },
+      create: { userId, items: json, rev: 1 },
+      update: { items: json, rev: { increment: 1 } },
+    });
+    return { items: c.items as unknown as StoredCartItem[], rev: c.rev };
   }
 }

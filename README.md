@@ -36,9 +36,11 @@ npm run db:seed   # loads the 6-product Audiophile catalog (headphones/speakers/
 1. [console.cloud.google.com](https://console.cloud.google.com) → create a project (or use an existing one).
 2. **APIs & Services → OAuth consent screen** → set it up for External users, add your own email as a test user while it's unpublished.
 3. **APIs & Services → Credentials → Create Credentials → OAuth client ID** → Application type: **Web application**.
-4. Authorized redirect URI: `http://localhost:3000/api/auth/callback/google` exactly — no trailing slash, `http` not `https` for local dev (add your production URL + the same path once deployed).
-5. Copy the Client ID and secret into `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET`.
-6. Set `NEXTAUTH_SECRET` to the output of `openssl rand -base64 32` (or `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` if you don't have `openssl`).
+4. Add these **Authorized redirect URIs** to the OAuth client (each exact, with no trailing slash):
+   - Local development: `http://localhost:3000/api/auth/callback/google`
+   - Production: `https://shop-hng.vercel.app/api/auth/callback/google`
+5. Copy the Client ID and secret into `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` in the local environment and the Vercel project environment variables.
+6. In Vercel, set `NEXTAUTH_URL` to `https://shop-hng.vercel.app` and set `NEXTAUTH_SECRET` to the same generated secret used for the deployment. Generate it with `openssl rand -base64 32` (or `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"` if you don't have `openssl`). Redeploy after changing the environment variables.
 
 ## 3. Brevo order emails
 

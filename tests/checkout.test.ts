@@ -4,22 +4,20 @@ import { computeTotals } from "@/lib/cart";
 import { setRepo } from "@/lib/db";
 import { MemoryOrderRepo } from "@/lib/memoryRepo";
 
-vi.mock("next-auth", () => ({ getServerSession: vi.fn() }));
+vi.mock("@/lib/getUser", () => ({ getUser: vi.fn() }));
 vi.mock("@/lib/brevo", () => ({
   sendOrderConfirmationEmail: vi.fn().mockResolvedValue(undefined),
 }));
 vi.mock("@/lib/paystack", () => ({ verifyPaystackTransaction: vi.fn() }));
 
-import { getServerSession } from "next-auth";
+import { getUser } from "@/lib/getUser";
 import { sendOrderConfirmationEmail } from "@/lib/brevo";
 import { verifyPaystackTransaction } from "@/lib/paystack";
 import { POST as checkout } from "@/app/api/checkout/route";
 import { GET as listProducts } from "@/app/api/products/route";
 
 const session = (email: string | null) =>
-  vi
-    .mocked(getServerSession)
-    .mockResolvedValue(email ? ({ user: { id: "u1", email } } as any) : null);
+  vi.mocked(getUser).mockResolvedValue(email ? { id: "u1", email } : null);
 
 /** Simulates a successful, correctly-priced Paystack charge for whatever total the test expects. */
 const paidSuccessfully = (amountMinor: number, currency = "NGN") =>
@@ -97,6 +95,10 @@ describe("POST /api/checkout", () => {
     expect(data.orderId).toBeTruthy();
     expect(data.emailSent).toBe(true);
     expect(verifyPaystackTransaction).toHaveBeenCalledWith("ref_test_123");
+    // stored under the authenticated user's id, so only they can read it back
+    const { getRepo } = await import("@/lib/db");
+    expect(await (await getRepo()).getOrder(data.orderId, "u1")).toBeTruthy();
+    expect(await (await getRepo()).getOrder(data.orderId, "someone-else")).toBeUndefined();
     expect(sendOrderConfirmationEmail).toHaveBeenCalledWith(
       "buyer@example.com",
       expect.objectContaining({
@@ -104,6 +106,17 @@ describe("POST /api/checkout", () => {
         paystackReference: "ref_test_123",
       }),
     );
+  });
+
+  it("empties the user's shared cart after a successful order (so web and mobile both show it empty)", async () => {
+    session("buyer@example.com");
+    const { getRepo } = await import("@/lib/db");
+    const p = await firstProduct();
+    await (await getRepo()).setCart("u1", [{ productId: p.id, quantity: 1 }]);
+    paidSuccessfully(computeTotals([{ priceCents: p.priceCents, quantity: 1 }]).totalCents);
+    const res = await checkout(req({ items: [{ productId: p.id, quantity: 1 }], ...base }));
+    expect(res.status).toBe(201);
+    expect((await (await getRepo()).getCart("u1")).items).toEqual([]);
   });
 
   it("400s and creates nothing when Paystack reports the payment wasn't successful", async () => {

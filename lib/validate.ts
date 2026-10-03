@@ -22,3 +22,7 @@ export const checkoutSchema = z.object({
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
+
+export const cartSchema = z.object({
+  items: z.array(checkoutItemSchema).max(50),
+});

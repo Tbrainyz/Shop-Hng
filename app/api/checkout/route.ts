@@ -1,9 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { computeTotals } from "@/lib/cart";
 import { CURRENCY } from "@/lib/currency";
 import { getRepo } from "@/lib/db";
+import { getUser } from "@/lib/getUser";
 import { badRequest, handle, unauthorized } from "@/lib/http";
 import { sendOrderConfirmationEmail } from "@/lib/brevo";
 import { verifyPaystackTransaction } from "@/lib/paystack";
@@ -12,8 +11,8 @@ import { checkoutSchema } from "@/lib/validate";
 export const dynamic = "force-dynamic";
 
 export const POST = handle(async (req: NextRequest) => {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) return unauthorized();
+  const user = await getUser(req);
+  if (!user) return unauthorized();
 
   const body = await req.json().catch(() => null);
   const parsed = checkoutSchema.safeParse(body);
@@ -66,17 +65,24 @@ export const POST = handle(async (req: NextRequest) => {
   }
 
   const order = await repo.createOrder({
-    userId: session.user.id ?? session.user.email,
-    userEmail: session.user.email,
+    userId: user.id,
+    userEmail: user.email,
     paystackReference: parsed.data.paystackReference,
     items: lineItems,
     shipping: parsed.data.shipping,
     ...totals,
   });
 
+  // The cart is now an order: empty the shared cart so the website and the app both show it empty.
+  try {
+    await repo.setCart(user.id, []);
+  } catch (e) {
+    console.error("failed to clear cart after order:", e);
+  }
+
   let emailSent = true;
   try {
-    await sendOrderConfirmationEmail(session.user.email, order);
+    await sendOrderConfirmationEmail(user.email, order);
   } catch (e) {
     console.error("order confirmation email failed:", e);
     emailSent = false;

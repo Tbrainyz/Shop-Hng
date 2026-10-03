@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { CURRENCY } from "./currency";
-import type { OrderRepo } from "./repo";
+import type { OrderRepo, StoredCart, StoredCartItem } from "./repo";
 import { getSeedProducts } from "./seedProducts";
 import type { CreateOrderInput, Order, Product } from "./types";
 
@@ -11,6 +11,7 @@ export class MemoryOrderRepo implements OrderRepo {
   );
   private orders = new Map<string, Order>();
   private usedReferences = new Set<string>();
+  private carts = new Map<string, StoredCart>();
 
   async listProducts() { return [...this.products.values()]; }
   async getProductsByIds(ids: string[]) { return ids.map((id) => this.products.get(id)).filter((p): p is Product => !!p); }
@@ -34,5 +35,16 @@ export class MemoryOrderRepo implements OrderRepo {
   async getOrder(id: string, userId: string) {
     const order = this.orders.get(id);
     return order && order.userId === userId ? order : undefined;
+  }
+
+  async getCart(userId: string): Promise<StoredCart> {
+    const c = this.carts.get(userId);
+    return c ? { items: c.items.map((i) => ({ ...i })), rev: c.rev } : { items: [], rev: 0 };
+  }
+
+  async setCart(userId: string, items: StoredCartItem[]): Promise<StoredCart> {
+    const next: StoredCart = { items: items.map((i) => ({ ...i })), rev: (this.carts.get(userId)?.rev ?? 0) + 1 };
+    this.carts.set(userId, next);
+    return { items: next.items.map((i) => ({ ...i })), rev: next.rev };
   }
 }

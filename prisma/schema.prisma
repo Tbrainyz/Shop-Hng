@@ -56,3 +56,11 @@ model OrderItem {
   priceCents Int
   quantity   Int
 }
+
+/// One row per signed-in user: the cart shared by the website and the mobile app.
+model Cart {
+  userId    String   @id
+  items     Json
+  rev       Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
